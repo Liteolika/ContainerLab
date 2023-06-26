@@ -4,12 +4,16 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>35e2e8b7-8953-4558-8ec8-0726898a42b9</UserSecretsId>
+    <UserSecretsId>517a1824-e7cc-4f4f-b3a1-11cf15fc45d2</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Backend.Shared\Backend.Shared.csproj" />
   </ItemGroup>
 
 </Project>
