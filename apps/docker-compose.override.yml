@@ -1,0 +1,31 @@
+services:
+
+  backend-customercare:
+    image: peter/backend/customercare
+    build:
+      context: ./Backend.Customer
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development 
+      - ASPNETCORE_URLS=http://+:80
+    volumes:
+     - localDevStorage:/storage
+
+  backend-finance:
+    image: peter/backend/finance
+    build:
+      context: ./Backend.Finance
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development 
+      - ASPNETCORE_URLS=http://+:80
+    volumes:
+     - localDevStorage:/storage
+
+volumes:
+  localDevStorage:
+    driver: local
+    driver_opts:
+     type: none
+     o: bind
+     device: C:\localDevStorage
