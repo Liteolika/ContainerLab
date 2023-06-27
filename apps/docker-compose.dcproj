@@ -6,7 +6,7 @@
     <ProjectGuid>dffa9978-8668-431d-891e-a56b2d96f39b</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
-    <DockerServiceName>customer.app</DockerServiceName>
+    <DockerServiceName>myapp</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">
