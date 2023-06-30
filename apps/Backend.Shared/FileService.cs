@@ -7,12 +7,12 @@
 
     public class FileService : IFileService
     {
-        private const string storagePath = "/storage";
-        
+        private const string StoragePath = "/storage";
+
         public Task CreateFile(string serviceName)
         {
             var fileName = $"{serviceName}{DateTime.Now:yyyyMMddhhmmsstttt}";
-            return File.AppendAllTextAsync(Path.Combine(storagePath, fileName), serviceName);
+            return File.AppendAllTextAsync(Path.Combine(StoragePath, fileName), serviceName);
         }
     }
 }

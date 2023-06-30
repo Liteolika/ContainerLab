@@ -7,19 +7,35 @@
 #           containerRegistryResoureGroup = rg-acr
 $secrets = Get-Content ".\deploy.secrets" | Out-String | ConvertFrom-StringData
 
+$version = 10
+
 $startLocation = Get-Location
 Set-Location ../apps
 dotnet clean Backend.Finance
 dotnet clean Backend.Customer
-docker build -t customer:dev -f .\Backend.Customer\Dockerfile .
-docker build -t finance:dev -f .\Backend.Finance\Dockerfile .
+docker build -t customer:build -f .\Backend.Customer\Dockerfile .
+docker build -t finance:build -f .\Backend.Finance\Dockerfile .
 Set-Location $startLocation
-az acr login --name $ACR_NAME
-$customerTag = "$($secrets.containerRegistryName).azurecr.io/testing/customer:v1"
-$financeTag = "$($secrets.containerRegistryName).azurecr.io/testing/finance:v1"
-docker tag finance:dev $financeTag
-docker tag customer:dev $customerTag
-docker push $financeTag
-docker push $customerTag
+az acr login --name $($secrets.containerRegistryName)
+
+docker tag finance:build "$($secrets.containerRegistryName).azurecr.io/testing/finance:$($version)"
+docker tag finance:build "$($secrets.containerRegistryName).azurecr.io/testing/finance:latest"
+
+docker tag customer:build "$($secrets.containerRegistryName).azurecr.io/testing/customer:$($version)"
+docker tag customer:build "$($secrets.containerRegistryName).azurecr.io/testing/customer:latest"
+
+docker push "$($secrets.containerRegistryName).azurecr.io/testing/finance:$($version)"
+docker push "$($secrets.containerRegistryName).azurecr.io/testing/finance:latest"
+
+docker push "$($secrets.containerRegistryName).azurecr.io/testing/customer:$($version)"
+docker push "$($secrets.containerRegistryName).azurecr.io/testing/customer:latest"
+
+docker image rm finance:build
+docker image rm customer:build
+docker image rm "$($secrets.containerRegistryName).azurecr.io/testing/finance:$($version)"
+docker image rm "$($secrets.containerRegistryName).azurecr.io/testing/finance:latest"
+docker image rm  "$($secrets.containerRegistryName).azurecr.io/testing/customer:$($version)"
+docker image rm  "$($secrets.containerRegistryName).azurecr.io/testing/customer:latest"
+
 
 
