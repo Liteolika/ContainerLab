@@ -2,35 +2,42 @@ param location string
 param appEnvironmentId string
 
 param containerRegistryLoginServer string
-param containerRegistryUser string
-@secure() 
-param containerRegistryPassword string
+
 @description('e.g. /something/imagename:v1')
 param containerImage string
 param containerName string
+param identityId string
+
+param env array = []
+
+var defaultEnv = [
+  {
+    name: 'defaultEnv'
+    value: 'defaultEnvValue'
+  }
+]
 
 resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: containerName
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${identityId}': {}
+    }
+  }
   properties: {
     managedEnvironmentId: appEnvironmentId
     configuration: {
-      secrets: [
-        {
-          name: 'container-registry-password'
-          value: containerRegistryPassword
-        }
-      ]
+      secrets: []
       ingress: {
         external: true
         targetPort: 80
       }
       registries: [
         {
-          //server is in the format of myregistry.azurecr.io
+          identity: identityId
           server: containerRegistryLoginServer
-          username: containerRegistryUser
-          passwordSecretRef: 'container-registry-password'
         }
       ]
     }
@@ -40,6 +47,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
           //This is in the format of myregistry.azurecr.io
           image: '${containerRegistryLoginServer}${containerImage}'
           name: containerName
+          env: concat(defaultEnv, env)
           resources: {
             cpu: '0.5'
             memory: '1.0Gi'

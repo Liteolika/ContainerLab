@@ -6,7 +6,6 @@
 #           location = swedencentral
 #           containerRegistryName = regname
 #           containerRegistryResoureGroup = rg-acr
-
 $secrets = Get-Content ".\deploy.secrets" | Out-String | ConvertFrom-StringData
 
 az account set --subscription $secrets.subscriptionId
@@ -16,6 +15,6 @@ az deployment sub create `
     --template-file bicep/main.bicep `
     --location $secrets.location `
     --parameters `
-        location=$secrets.location `
-        containerRegistryName=$secrets.containerRegistryName `
-        containerRegistryResourceGroup=$secrets.containerRegistryResoureGroup
+        location="$($secrets.location)" `
+        containerRegistryName="$($secrets.containerRegistryName)" `
+        containerRegistryResourceGroup="$($secrets.containerRegistryResoureGroup)"

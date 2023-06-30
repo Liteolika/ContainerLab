@@ -9,14 +9,25 @@ namespace Backend.Customer.Pages
         private readonly ILogger<IndexModel> _logger;
         private readonly IFileService _fileService;
 
-        public IndexModel(ILogger<IndexModel> logger, IFileService fileService)
+        public Dictionary<string, string> Data = new Dictionary<string, string>();
+
+        public IndexModel(ILogger<IndexModel> logger, IFileService fileService, IConfiguration configuration)
         {
             _logger = logger;
             _fileService = fileService;
+
+            var keyVaultName = configuration["KeyVaultName"];
+            Data.Add("KeyVaultName", keyVaultName);
+
+            var azureAdManagedIdentityClientId = configuration["AzureADManagedIdentityClientId"];
+            Data.Add("AzureADManagedIdentityClientId", azureAdManagedIdentityClientId);
+
         }
 
         public async Task OnGet()
         {
+            _logger.LogWarning($"{nameof(IndexModel)} - {nameof(OnGet)}");
+
             await _fileService.CreateFile(nameof(Customer));
         }
     }
