@@ -11,6 +11,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
       name: 'standard'
       family: 'A'
     }
+    createMode: 'default' // This should be set to 'recover' if production env.
     accessPolicies: [
       {
         tenantId: tenantId

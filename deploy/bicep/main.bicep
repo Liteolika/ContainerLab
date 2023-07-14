@@ -78,6 +78,15 @@ module storage 'modules/storageAccount.bicep' = {
   }
 }
 
+module vnet 'modules/appEnvVnet.bicep' = {
+  name: 'Deploy_Vnet'
+  scope: rg 
+  params: {
+    name: 'vnet-${suffix}'
+    location: location
+  }
+}
+
 module appEnv 'modules/appEnvironment.bicep' = {
   name: 'Deploy_AppEnv'
   scope: rg
@@ -89,6 +98,7 @@ module appEnv 'modules/appEnvironment.bicep' = {
     storageAccountName: storage.outputs.storageAccountName
     storageShareName: storage.outputs.shareName
     storageAccountKey: storage.outputs.accountKey
+    subnetId: vnet.outputs.subnetId
   }
 }
 
@@ -112,6 +122,7 @@ module financeApp 'modules/containerApp.bicep' = {
     containerImage: '/testing/finance:latest'
     containerRegistryLoginServer: registry.properties.loginServer
     identityId: appIdentity.outputs.id
+    externalIngressEnabled: false
     env: [
       {
         name: 'KeyVaultName'
@@ -126,8 +137,6 @@ module financeApp 'modules/containerApp.bicep' = {
         value: appInsights.outputs.connectionString
       }
     ]
-    // containerRegistryUser: registry.name
-    // containerRegistryPassword: registry.listCredentials().passwords[0].value
   }
 }
 
@@ -141,6 +150,7 @@ module customerApp 'modules/containerApp.bicep' = {
     containerImage: '/testing/customer:latest'
     containerRegistryLoginServer: registry.properties.loginServer
     identityId: appIdentity.outputs.id
+    externalIngressEnabled: false
     env: [
       {
         name: 'KeyVaultName'
@@ -155,10 +165,45 @@ module customerApp 'modules/containerApp.bicep' = {
         value: appInsights.outputs.connectionString
       }
     ]
-    // containerRegistryUser: registry.name
-    // containerRegistryPassword: registry.listCredentials().passwords[0].value
+  }
+}
+
+module reverseProxy 'modules/containerApp.bicep' = {
+  name: 'Deploy_ReverseProxy'
+  scope: rg
+  params: {
+    containerName: 'reverseproxy'
+    location: location
+    appEnvironmentId: appEnv.outputs.environmentId
+    containerImage: '/testing/reverseproxy:latest'
+    containerRegistryLoginServer: registry.properties.loginServer
+    identityId: appIdentity.outputs.id
+    externalIngressEnabled: true
+    env: [
+      {
+        name: 'KeyVaultName'
+        value: keyVault.outputs.name
+      }
+      {
+        name: 'AzureADManagedIdentityClientId'
+        value: appIdentity.outputs.clientId
+      }
+      {
+        name: 'ApplicationInsights__ConnectionString'
+        value: appInsights.outputs.connectionString
+      }
+      {
+        name: 'CLUSTER_customer'
+        value: 'http://${customerApp.outputs.containerName}:80'
+      }
+      {
+        name: 'CLUSTER_finance'
+        value: 'http://${financeApp.outputs.containerName}:80'
+      }
+    ]
   }
 }
 
 output financeUrl string = financeApp.outputs.fqdn
 output customerUrl string = customerApp.outputs.fqdn
+output proxyUrl string = reverseProxy.outputs.fqdn

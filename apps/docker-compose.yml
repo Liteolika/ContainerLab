@@ -1,16 +1,11 @@
 version: '3.8'
 services:
-  backend-customercare:
+  backend-customer:
     image: multicontainertest.azurecr.io/peter/backend/customer
     container_name: customer
     build:
       context: ./Backend.Customer
       dockerfile: Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development 
-      - ASPNETCORE_URLS=http://+:80
-    ports:
-      - "5001:80"
 
   backend-finance:
     image: multicontainertest.azurecr.io/peter/backend/finance
@@ -18,9 +13,11 @@ services:
     build:
       context: ./Backend.Finance
       dockerfile: Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:80
-    ports:
-      - "5002:80"
+
+  backend.reverseproxy:
+    image: multicontainertest.azurecr.io/peter/backend/reverseproxy
+    container_name: reverseproxy
+    build:
+      context: ./Backend.ReverseProxy
+      dockerfile: Dockerfile
 

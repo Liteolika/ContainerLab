@@ -8,6 +8,12 @@ param storageShareName string
 @secure()
 param storageAccountKey string
 
+param subnetId string
+// param dockerBridgeCidr string
+// param platformReservedCidr string
+// param platformReservedDnsIP string
+
+
 resource environment 'Microsoft.App/managedEnvironments@2023-04-01-preview' = {
   name: name
   location: location
@@ -18,6 +24,10 @@ resource environment 'Microsoft.App/managedEnvironments@2023-04-01-preview' = {
         customerId: logAnalyticsCustomerId
         sharedKey: logAnalyticsSharedKey
       }
+    }
+    vnetConfiguration: {
+      infrastructureSubnetId: subnetId
+      internal: true
     }
   }
 }

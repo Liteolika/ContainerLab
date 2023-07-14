@@ -17,4 +17,5 @@ az deployment sub create `
     --parameters `
         location="$($secrets.location)" `
         containerRegistryName="$($secrets.containerRegistryName)" `
-        containerRegistryResourceGroup="$($secrets.containerRegistryResoureGroup)"
+        containerRegistryResourceGroup="$($secrets.containerRegistryResoureGroup)" `
+    #--query properties.outputs.fqdn.value

@@ -1,5 +1,7 @@
 using Azure.Identity;
 using Backend.Shared;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Rewrite;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,14 @@ if (builder.Environment.IsProduction())
             ManagedIdentityClientId = builder.Configuration["AzureADManagedIdentityClientId"]
         }));
 }
+
+// For YARP Reverse Proxy
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 //builder.Logging.AddApplicationInsights();
 
@@ -41,6 +51,15 @@ builder.Services.AddTransient<IFileService, FileService>();
 
 var app = builder.Build();
 
+app.Use((context, next) =>
+{
+    if (context.Request.Headers.TryGetValue("X-Forwarded-Service", out var forwardedServiceName))
+    {
+        context.Request.PathBase = new PathString($"/{forwardedServiceName}");
+    }
+    return next(context);
+});
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -49,8 +68,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// For YARP Reverse Proxy
+app.UseForwardedHeaders();
+
+// app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 
 app.UseRouting();
 
